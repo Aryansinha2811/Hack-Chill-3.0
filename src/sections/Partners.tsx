@@ -1,12 +1,12 @@
-import { Zap, Square, Hexagon } from 'lucide-react';
+
 
 const Partners = () => {
   const partners = [
-    { name: '', icon: Square },
-    { name: 'VW', icon: null },
-    { name: 'KRAFTON', icon: Hexagon },
-    { name: 'DUCAT', icon: Zap },
-    { name: 'PARTNER X', icon: null },
+     {
+      name: "DEVFOLIO LOGO",
+      logo: "/Devfolio.png",
+      link: "https://devfolio.co/",
+    },
   ];
 
   return (
@@ -27,48 +27,27 @@ const Partners = () => {
 
         {/* Partner Grid */}
         <div className="flex flex-wrap justify-center gap-6">
-          {/* Row 1 */}
-          <div className="flex flex-wrap justify-center gap-6 w-full">
-            {partners.slice(0, 3).map((partner, index) => (
-              <div
-                key={index}
-                className="partner-card w-40 h-28 bg-[#0f0f1a] rounded-xl border border-[#1a1a2e] flex items-center justify-center cursor-pointer"
-              >
-                {partner.icon ? (
-                  <partner.icon className="w-10 h-10 text-white" />
-                ) : partner.name ? (
-                  <span className="text-white font-bold text-lg tracking-wider">
-                    {partner.name}
-                  </span>
-                ) : (
-                  <div className="w-10 h-10 bg-white rounded-lg" />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Row 2 */}
-          <div className="flex flex-wrap justify-center gap-6 w-full mt-4">
-            {partners.slice(3).map((partner, index) => (
-              <div
-                key={index + 3}
-                className="partner-card w-40 h-28 bg-[#0f0f1a] rounded-xl border border-[#1a1a2e] flex items-center justify-center cursor-pointer"
-              >
-                {partner.icon ? (
-                  <div className="flex items-center gap-2">
-                    <partner.icon className="w-5 h-5 text-[#fbbf24]" />
-                    <span className="text-white font-bold text-sm tracking-wider">
-                      {partner.name}
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-white font-bold text-lg tracking-wider">
-                    {partner.name}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+          {partners.map((partner, index) => (
+            <a
+              key={index}
+              href={partner.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="partner-card w-40 h-28 bg-[#0f0f1a] rounded-xl border border-[#1a1a2e] flex items-center justify-center cursor-pointer hover:border-[#00d4d4] transition-colors"
+            >
+              {partner.logo ? (
+                <img 
+                  src={partner.logo} 
+                  alt={partner.name}
+                  className="max-w-[90%] max-h-[90%] object-contain"
+                />
+              ) : (
+                <span className="text-white font-bold text-lg tracking-wider">
+                  {partner.name}
+                </span>
+              )}
+            </a>
+          ))}
         </div>
 
         {/* Bottom decorative line */}
