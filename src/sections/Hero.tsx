@@ -1,11 +1,22 @@
+import { useEffect } from 'react';
 import { ArrowRight, MessageCircle, Clock, Users, Sparkles, Star } from 'lucide-react';
 
 const Hero = () => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://apply.devfolio.co/v2/sdk.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    }
+  }, [])
   return (
     <section id="hero" className="min-h-screen bg-[#0a0a1a] relative overflow-hidden pt-20">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a1a] via-[#0d0d1a] to-[#070714]" />
-      
+
       {/* Floating decorative elements */}
       <div className="absolute top-32 right-20 text-[#ff6b35] animate-float">
         <Star className="w-6 h-6 fill-current" />
@@ -42,7 +53,7 @@ const Hero = () => {
 
             {/* Description */}
             <p className="text-gray-400 text-base max-w-md leading-relaxed">
-              A 36-hour nocturnal odyssey where the brightest minds build under the desert stars. 
+              A 36-hour nocturnal odyssey where the brightest minds build under the desert stars.
               No bugs, just pure neon vibes.
             </p>
 
@@ -52,10 +63,12 @@ const Hero = () => {
                 Register Now
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="group flex items-center gap-2 border-2 border-[#00d4d4] text-[#00d4d4] hover:bg-[#00d4d4] hover:text-[#0a0a1a] px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-[0_0_30px_rgba(0,212,212,0.4)]">
-                Join Discord
-                <MessageCircle className="w-4 h-4" />
-              </button>
+              <div
+                className="apply-button"
+                data-hackathon-slug="hackandchill-3"
+                data-button-theme="light"
+                style={{ height: '44px', width: '312px' }}
+              ></div>
             </div>
 
             {/* Stats */}
@@ -150,7 +163,7 @@ const Hero = () => {
                     <div className="w-40 h-24 bg-gradient-to-r from-[#1a1a2e] to-[#0f0f1a] rounded-full border-2 border-[#00d4d4] flex items-center justify-center relative overflow-hidden">
                       {/* Inner eye gradient */}
                       <div className="absolute inset-0 bg-gradient-to-r from-[#00d4d4]/20 via-[#ec4899]/20 to-[#a855f7]/20" />
-                      
+
                       {/* Pupil */}
                       <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#00d4d4] to-[#a855f7] flex items-center justify-center">
                         <div className="w-6 h-6 bg-white rounded-full opacity-80" />
