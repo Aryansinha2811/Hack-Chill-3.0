@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { 
   Menu, X, Diamond, Sparkles, Eye, Star, Zap, 
   Lock, Briefcase, MessageSquare, Camera, Twitter,
@@ -7,6 +7,42 @@ import {
   Heart, Asterisk, Pin, Flag, BookOpen, HelpCircle,
   LayoutGrid, Code2, Terminal
 } from 'lucide-react';
+
+import Photo1 from './assets/HC1/Photo1.JPG';
+import Photo2 from './assets/HC1/Photo2.JPG';
+import Photo3 from './assets/HC1/Photo3.JPG';
+import Photo4 from './assets/HC1/Photo4.JPG';
+import Photo5 from './assets/HC1/Photo5.JPG';
+import Photo6 from './assets/HC1/Photo6.JPG';
+import Photo7 from './assets/HC1/Photo7.JPG';
+import Photo8 from './assets/HC1/Photo8.JPG';
+import Photo9 from './assets/HC1/Photo9.JPG';
+import Photo10 from './assets/HC1/Photo10.JPG';
+
+import HC1 from './assets/HC2/Photo1.JPG';
+import HC2 from './assets/HC2/Photo2.JPG';
+import HC3 from './assets/HC2/Photo3.JPG';
+import HC4 from './assets/HC2/Photo4.JPG';
+import HC5 from './assets/HC2/Photo5.JPG';
+import HC6 from './assets/HC2/Photo6.JPG';
+import HC7 from './assets/HC2/Photo7.JPG';
+import HC8 from './assets/HC2/Photo8.JPG';
+import HC9 from './assets/HC2/Photo9.JPG';
+import HC10 from './assets/HC2/Photo10.JPG';
+
+interface CarouselSlide {
+  src?: string;           // swap in real image URLs here
+  placeholder?: string;   // label shown until real photos drop
+}
+
+interface EditionConfig {
+  id: string;
+  label: string;
+  accent: string;         // CSS color value
+  accentClass: string;    // Tailwind text color
+  borderClass: string;    // Tailwind border color
+  slides: CarouselSlide[];
+}
 
 // Navigation Component
 function Navbar() {
@@ -737,18 +773,235 @@ function MentorsSection() {
   );
 }
 
+// Data 
+const EDITIONS: EditionConfig[] = [
+  {
+    id: "hnc1",
+    label: "HNC 1.0",
+    accent: "#00E5BE",
+    accentClass: "text-teal",
+    borderClass: "border-teal",
+    slides: [
+      { src: Photo1, placeholder: "PHOTO 01" },
+      { src: Photo2, placeholder: "PHOTO 02" },
+      { src: Photo3, placeholder: "PHOTO 03" },
+      { src: Photo4, placeholder: "PHOTO 04" },
+      { src: Photo5, placeholder: "PHOTO 05" },
+      { src: Photo6, placeholder: "PHOTO 06" },
+      { src: Photo7, placeholder: "PHOTO 07" },
+      { src: Photo8, placeholder: "PHOTO 08" },
+      { src: Photo9, placeholder: "PHOTO 09" },
+      { src: Photo10, placeholder: "PHOTO 10" },
+
+    ],
+  },
+  {
+    id: "hnc2",
+    label: "HNC 2.0",
+    accent: "#F4A07A",
+    accentClass: "text-peach",
+    borderClass: "border-peach",
+    slides: [
+      { src: HC1, placeholder: "PHOTO 01" },
+      { src: HC2, placeholder: "PHOTO 02" },
+      { src: HC3, placeholder: "PHOTO 03" },
+      { src: HC4, placeholder: "PHOTO 04" },
+      { src: HC5, placeholder: "PHOTO 05" },
+      { src: HC6, placeholder: "PHOTO 06" },
+      { src: HC7, placeholder: "PHOTO 07" },
+      { src: HC8, placeholder: "PHOTO 08" },
+      { src: HC9, placeholder: "PHOTO 09" },
+      { src: HC10, placeholder: "PHOTO 10" },
+    ],
+  },
+];
+
+const AUTOPLAY_MS = 2000;
+
+// ─── Single Edition Carousel ──────────────────────────────────────────────────
+function EditionCarousel({ edition }: { edition: EditionConfig }) {
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const total = edition.slides.length;
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    // Reset + re-trigger progress bar CSS animation
+    if (progressRef.current) {
+      progressRef.current.style.transition = "none";
+      progressRef.current.style.width = "0%";
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (progressRef.current) {
+            progressRef.current.style.transition = `width ${AUTOPLAY_MS}ms linear`;
+            progressRef.current.style.width = "100%";
+          }
+        })
+      );
+    }
+
+    timerRef.current = setInterval(() => {
+      if (!paused) setCurrent((c) => (c + 1) % total);
+    }, AUTOPLAY_MS);
+  }, [paused, total]);
+
+  useEffect(() => {
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [current, paused, resetTimer]);
+
+  const go = (index: number) => {
+    setCurrent((index + total) % total);
+  };
+
+  return (
+    <div
+      className={`relative aspect-square overflow-hidden border-2 ${edition.borderClass} group`}
+      style={{ background: "#0D1117" }}
+      onMouseEnter={() => {
+        setPaused(true);
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (progressRef.current) {
+          const w = progressRef.current.getBoundingClientRect().width;
+          const parent = progressRef.current.parentElement!.getBoundingClientRect().width;
+          progressRef.current.style.transition = "none";
+          progressRef.current.style.width = `${(w / parent) * 100}%`;
+        }
+      }}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* ── Slides ── */}
+      <div
+        className="flex w-full h-full transition-transform duration-500"
+        style={{
+          transform: `translateX(-${current * 100}%)`,
+          transitionTimingFunction: "cubic-bezier(0.77,0,0.18,1)",
+        }}
+      >
+        {edition.slides.map((slide, i) => (
+          <div key={i} className="relative min-w-full h-full flex items-center justify-center shrink-0">
+            {slide.src ? (
+              <img
+                src={slide.src}
+                alt={`${edition.label} – ${slide.placeholder ?? i + 1}`}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              /* placeholder until real photos drop */
+              <div
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-30"
+                style={{
+                  background:
+                    edition.id === "hnc1"
+                      ? "linear-gradient(135deg,#0a2e28,#00E5BE18)"
+                      : "linear-gradient(135deg,#2e1a0a,#F4A07A18)",
+                }}
+              >
+                {/* camera icon */}
+                <svg className="w-12 h-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="2" y="7" width="20" height="14" rx="1" />
+                  <circle cx="12" cy="14" r="3" />
+                  <path d="M9 7l1.5-3h3L15 7" />
+                </svg>
+                <span className="font-mono text-xs tracking-[0.2em] text-white">
+                  {slide.placeholder}
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Dark gradient overlay ── */}
+      <div
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{ background: "linear-gradient(to top,rgba(13,17,23,.92) 0%,rgba(13,17,23,.25) 45%,transparent 100%)" }}
+      />
+
+      {/* ── Slide counter top-left ── */}
+      <span className="absolute top-4 left-4 z-20 font-mono text-[10px] tracking-[0.15em] text-white/50">
+        {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+      </span>
+
+      {/* ── Edition badge top-right ── */}
+      <span className="absolute top-4 right-4 z-20 font-mono text-[9px] tracking-[0.2em] px-3 py-1 rounded-full bg-navy/80 border border-white/15 backdrop-blur-sm">
+        {edition.label}
+      </span>
+
+      {/* ── Prev / Next arrows ── */}
+      <button
+        onClick={() => go(current - 1)}
+        className="arrow-btn absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center bg-navy/70 border border-white/15 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white/15 rounded-full"
+        aria-label="Previous slide"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="15,18 9,12 15,6" />
+        </svg>
+      </button>
+      <button
+        onClick={() => go(current + 1)}
+        className="arrow-btn absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center bg-navy/70 border border-white/15 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white/15 rounded-full"
+        aria-label="Next slide"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="9,18 15,12 9,6" />
+        </svg>
+      </button>
+
+      {/* ── Bottom label + dots ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex items-end justify-between px-6 pb-6">
+        <h3
+          className="font-display text-[40px] leading-none tracking-wide"
+          style={{ color: edition.accent }}
+        >
+          {edition.label}
+        </h3>
+
+        {/* Dot indicators */}
+        <div className="flex items-center gap-1.5">
+          {edition.slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => go(i)}
+              className="h-1.5 rounded-sm transition-all duration-300"
+              style={{
+                width: i === current ? "18px" : "6px",
+                background: i === current ? edition.accent : "rgba(255,255,255,0.3)",
+              }}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Progress bar (bottom edge) ── */}
+      <div
+        ref={progressRef}
+        className="absolute bottom-0 left-0 h-0.5 z-30"
+        style={{ width: "0%", background: edition.accent }}
+      />
+    </div>
+  );
+}
+
 // Past Editions Section
 function PastEditionsSection() {
   return (
-    <section id="editions" className="bg-navy py-20 px-6 md:px-12 lg:px-20 relative overflow-hidden">
-      {/* Teal Star */}
+    <section
+      id="editions"
+      className="bg-navy py-20 px-6 md:px-12 lg:px-20 relative overflow-hidden"
+    >
+      {/* Teal star */}
       <div className="absolute top-8 right-8 md:right-20">
-        <svg width="60" height="60" viewBox="0 0 60 60" className="text-teal fill-teal">
+        <svg width="60" height="60" viewBox="0 0 60 60" className="fill-teal">
           <polygon points="30,5 37,20 55,20 40,30 47,47 30,37 13,47 20,30 5,20 23,20" />
         </svg>
       </div>
 
-      {/* Peach Diamond */}
+      {/* Peach diamond */}
       <div className="absolute top-20 left-8">
         <Diamond className="w-6 h-6 text-peach fill-peach" />
       </div>
@@ -759,28 +1012,14 @@ function PastEditionsSection() {
         <h2 className="font-display text-6xl md:text-8xl text-white">EDITIONS</h2>
       </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
-        {/* HNC 1.0 */}
-        <div className="bg-teal p-12 flex flex-col items-center justify-center aspect-square relative">
-          <h3 className="font-display text-5xl text-navy mb-6">HNC 1.0</h3>
-          <Lock className="w-16 h-16 text-navy mb-6" />
-          <button className="bg-navy text-white px-6 py-3 rounded-full font-mono text-sm tracking-wider hover:bg-navy/80 transition-colors">
-            COMING SOON
-          </button>
-        </div>
-
-        {/* HNC 2.0 */}
-        <div className="bg-peach p-12 flex flex-col items-center justify-center aspect-square relative">
-          <h3 className="font-display text-5xl text-navy mb-6">HNC 2.0</h3>
-          <Lock className="w-16 h-16 text-navy mb-6" />
-          <button className="bg-navy text-white px-6 py-3 rounded-full font-mono text-sm tracking-wider hover:bg-navy/80 transition-colors">
-            COMING SOON
-          </button>
-        </div>
+      {/* Carousels */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl">
+        {EDITIONS.map((ed) => (
+          <EditionCarousel key={ed.id} edition={ed} />
+        ))}
       </div>
 
-      {/* Decorative Stars Bottom */}
+      {/* Bottom decorations */}
       <div className="absolute bottom-8 left-8">
         <Star className="w-24 h-24 text-white/5 fill-white/5" />
       </div>
@@ -790,6 +1029,7 @@ function PastEditionsSection() {
     </section>
   );
 }
+
 
 // Register CTA Section
 function RegisterSection() {
